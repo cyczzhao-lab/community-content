@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CHRONO-HEX: TEMPO NEXUS — Turn-Based Strategy for Humans &amp; AI Agents</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-0: #060911;
+      --bg-1: #0D1322;
+      --bg-2: #141D33;
+      --border: #253354;
+      --border-bright: #3B5284;
+      --text: #F1F5F9;
+      --muted: #94A3B8;
+      --accent: #00D2FF;
+      --solaris: #FF5500;
+      --aether: #00D2FF;
+      --verdant: #10B981;
+      --obsidian: #C084FC;
+      --gold: #F59E0B;
+      --danger: #EF4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: radial-gradient(circle at 50% 15%, #111A30 0%, var(--bg-0) 75%);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* TOP MASTHEAD */
+    header.masthead {
+      background: rgba(13, 19, 34, 0.92);
+      border-bottom: 2px solid var(--border);
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      backdrop-filter: blur(10px);
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #FF5500 0%, #00D2FF 100%);
+      display: grid;
+      place-items: center;
+      font-family: 'Chakra Petch', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: #060911;
+      box-shadow: 0 0 16px rgba(0, 210, 255, 0.35);
+    }
+
+    .brand-title h1 {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 20px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #FFFFFF;
+      line-height: 1.1;
+    }
+
+    .brand-title p {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .lobby-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .code-badge {
+      display: flex;
+      align-items: center;
+      background: var(--bg-0);
+      border: 1px solid var(--border-bright);
+      border-radius: 6px;
+      padding: 4px 8px;
+      gap: 6px;
+    }
+
+    .code-badge span {
+      font-size: 10px;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .code-badge input {
+      background: transparent;
+      border: none;
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 13px;
+      width: 115px;
+      outline: none;
+      text-transform: uppercase;
+    }
+
+    select.ctrl-select, button.btn {
+      background: var(--bg-2);
+      color: var(--text);
+      border: 1px solid var(--border-bright);
+      border-radius: 6px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    button.btn:hover, select.ctrl-select:hover {
+      border-color: var(--accent);
+      background: #1C2947;
+    }
+
+    button.btn-primary {
+      background: linear-gradient(135deg, #0077FF 0%, #00D2FF 100%);
+      color: #040811;
+      border-color: #00D2FF;
+      font-weight: 700;
+    }
+
+    button.btn-primary:hover {
+      filter: brightness(1.1);
+    }
+
+    button.btn-warn {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: var(--gold);
+      color: #FCD34D;
+    }
+
+    /* MAIN 3-COLUMN WORKSPACE */
+    main.workspace {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 300px 1fr 340px;
+      gap: 14px;
+      padding: 14px 18px;
+      max-width: 1640px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 1180px) {
+      main.workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: rgba(13, 19, 34, 0.88);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+    }
+
+    .panel-header {
+      padding: 10px 14px;
+      background: rgba(20, 29, 51, 0.75);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #E2E8F0;
+    }
+
+    .panel-body {
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* PLAYER CARDS */
+    .player-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: rgba(6, 9, 17, 0.65);
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .player-card.active {
+      border-width: 2px;
+      box-shadow: 0 0 16px rgba(0, 210, 255, 0.2);
+    }
+
+    .player-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .player-name {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .faction-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .turn-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .player-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px dashed rgba(148, 163, 184, 0.2);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+    }
+
+    .stat-box {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-label {
+      font-size: 9px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .stat-val {
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .role-select {
+      width: 100%;
+      margin-top: 6px;
+      background: var(--bg-1);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 6px;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ACTION PALETTE */
+    .action-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .action-btn {
+      background: var(--bg-1);
+      border: 1px solid var(--border-bright);
+      border-radius: 8px;
+      padding: 9px 10px;
+      text-align: left;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .action-btn:hover:not(:disabled) {
+      border-color: var(--accent);
+      background: rgba(0, 210, 255, 0.08);
+    }
+
+    .action-btn.selected {
+      border-color: var(--gold);
+      background: rgba(245, 158, 11, 0.16);
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
+    }
+
+    .action-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .action-title {
+      font-family: 'Chakra Petch', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .action-cost {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--gold);
+    }
+
+    .action-desc {
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    /* CENTER BOARD AREA */
+    .board-panel {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 600px;
+      background: radial-gradient(circle at 50% 50%, #131E38 0%, #080C17 85%);
+    }
+
+    .hud-ribbon {
+      width: 100%;
+      padding: 10px 16px;
+      background: rgba(6, 9, 17, 0.78);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .round-indicator {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ap-pip {
+      display: inline-block;
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 8px var(--gold);
+      margin-right: 4px;
+    }
+
+    .ap-pip.spent {
+      background: #334155;
+      box-shadow: none;
+    }
+
+    .prompt-banner {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--accent);
+      background: rgba(0, 210, 255, 0.1);
+      border: 1px solid rgba(0, 210, 255, 0.3);
+      padding: 5px 10px;
+      border-radius: 6px;
+    }
+
+    .svg-container {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      position: relative;
+    }
+
+    svg#hex-board {
+      width: 100%;
+      max-width: 640px;
+      max-height: 540px;
+      height: auto;
+      user-select: none;
+      filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.6));
+    }
+
+    .hex-cell {
+      cursor: pointer;
+      transition: transform 0.12s ease;
+    }
+
+    .hex-polygon {
+      stroke-width: 2;
+      transition: fill 0.18s ease, stroke 0.18s ease, stroke-width 0.18s ease;
+    }
+
+    .hex-cell:hover .hex-polygon {
+      stroke: #FFFFFF !important;
+      stroke-width: 3 !important;
+    }
+
+    .hex-cell.selected .hex-polygon {
+      stroke: #F59E0B !important;
+      stroke-width: 3.5 !important;
+    }
+
+    .hex-cell.legal-target .hex-polygon {
+      stroke: #10B981 !important;
+      stroke-width: 3.2 !important;
+      stroke-dasharray: 5 3;
+    }
+
+    .board-footer {
+      width: 100%;
+      padding: 9px 16px;
+      background: rgba(6, 9, 17, 0.85);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* RIGHT COLUMN: TABS (LOG / REPLAY / AGENT API / RULES) */
+    .tab-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: var(--bg-0);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      padding: 10px 6px;
+      font-family: 'Chakra Petch', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      background: rgba(0, 210, 255, 0.06);
+    }
+
+    .log-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 330px;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      padding-right: 4px;
+    }
+
+    .log-item {
+      padding: 6px 8px;
+      border-radius: 5px;
+      background: rgba(6, 9, 17, 0.65);
+      border-left: 3px solid var(--border-bright);
+      line-height: 1.35;
+    }
+
+    .replay-box {
+      background: rgba(6, 9, 17, 0.75);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .replay-box input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    pre.code-block {
+      background: #050811;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      color: #A5F3FC;
+      overflow-x: auto;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+
+    .rules-para {
+      font-size: 12px;
+      line-height: 1.55;
+      color: #CBD5E1;
+      background: rgba(20, 29, 51, 0.55);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    /* VICTORY BANNER OVERLAY */
+    .victory-banner {
+      display: none;
+      position: absolute;
+      top: 62px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      background: rgba(6, 9, 17, 0.95);
+      border: 2px solid var(--gold);
+      border-radius: 10px;
+      padding: 14px 22px;
+      text-align: center;
+      box-shadow: 0 0 35px rgba(245, 158, 11, 0.45);
+      max-width: 90%;
+    }
+
+    .victory-banner.visible {
+      display: block;
+    }
+
+    .victory-banner h2 {
+      font-family: 'Chakra Petch', sans-serif;
+      color: var(--gold);
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .victory-banner p {
+      font-size: 13px;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP MASTHEAD & LOBBY BAR -->
+  <header class="masthead">
+    <div class="brand-group">
+      <div class="brand-logo">⬡</div>
+      <div class="brand-title">
+        <h1>CHRONO-HEX: TEMPO NEXUS</h1>
+        <p>Turn-Based Tactical Hex Strategy for Humans &amp; AI Agents · 2–4 Players · &lt;5 Min Matches</p>
+      </div>
+    </div>
+
+    <div class="lobby-controls">
+      <div class="code-badge" title="Lobby / Match Code — share or connect via HTTP/JSON API">
+        <span>Lobby Code</span>
+        <input id="match-code-input" type="text" value="TEMPO-4217" aria-label="Match Code" />
+      </div>
+
+      <select id="player-count-select" class="ctrl-select" aria-label="Player Count">
+        <option value="2" selected>2 Players (Duel)</option>
+        <option value="3">3 Players (Triad)</option>
+        <option value="4">4 Players (4-Way War)</option>
+      </select>
+
+      <button id="btn-new-match" class="btn btn-primary">New / Join Match</button>
+      <button id="btn-bot-step" class="btn">🤖 Step Bot Move</button>
+      <button id="btn-autoplay" class="btn btn-warn">⚡ Auto-Sim Bot vs Bot</button>
+    </div>
+  </header>
+
+  <!-- MAIN 3-COLUMN WORKSPACE -->
+  <main class="workspace">
+
+    <!-- LEFT PANEL: SEATS, COMMAND PALETTE & TURN CONTROLS -->
+    <section class="panel">
+      <div class="panel-header">
+        <span>Commanders &amp; Seats (2–4P)</span>
+        <span id="status-badge" style="color: var(--accent);">ACTIVE</span>
+      </div>
+      <div class="panel-body">
+        <div id="players-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
+
+        <div style="border-top: 1px solid var(--border); padding-top: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-family: 'Chakra Petch', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; color: #E2E8F0;">
+              Tactical Orders (2 AP / Turn)
+            </span>
+            <span id="active-ap-label" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gold);">
+              2 AP Left
+            </span>
+          </div>
+
+          <div class="action-grid">
+            <button id="act-MARCH" class="action-btn selected" onclick="UI.selectAction('MARCH')">
+              <div class="action-title"><span>⚔️ MARCH</span><span class="action-cost">1 AP · 0⚡</span></div>
+              <div class="action-desc">Move &amp; attack adjacent hex. Attacker &gt; Defender+Shield captures!</div>
+            </button>
+
+            <button id="act-DEPLOY" class="action-btn" onclick="UI.selectAction('DEPLOY')">
+              <div class="action-title"><span>➕ DEPLOY</span><span class="action-cost">1 AP · 2⚡</span></div>
+              <div class="action-desc">Reinforce any owned hex with +2 units (max 8).</div>
+            </button>
+
+            <button id="act-FORTIFY" class="action-btn" onclick="UI.selectAction('FORTIFY')">
+              <div class="action-title"><span>🛡️ FORTIFY</span><span class="action-cost">1 AP · 2⚡</span></div>
+              <div class="action-desc">Add Aegis Shield (+1 defense &amp; EMP protection) +1 unit.</div>
+            </button>
+
+            <button id="act-PULSE" class="action-btn" onclick="UI.selectAction('PULSE')">
+              <div class="action-title"><span>🌩️ EMP PULSE</span><span class="action-cost">1 AP · 4⚡</span></div>
+              <div class="action-desc">Range-2 orbital strike: -2 enemy units &amp; strips shield.</div>
+            </button>
+          </div>
+
+          <button id="btn-end-turn" class="btn btn-primary" style="width: 100%; margin-top: 10px; padding: 10px;" onclick="UI.endTurn()">
+            ⏭️ End Turn &amp; Harvest Yield
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CENTER PANEL: TACTICAL HEX GRID -->
+    <section class="panel board-panel">
+      <div class="hud-ribbon">
+        <div class="round-indicator">
+          <span id="round-label">ROUND 1 / 12</span>
+          <span style="color: var(--muted);">|</span>
+          <span id="turn-owner-label" style="color: var(--solaris);">Solaris Commander's Turn</span>
+          <span id="ap-pips-container"></span>
+        </div>
+        <div id="prompt-banner" class="prompt-banner">
+          Select an owned hex with 2+ units to MARCH, or choose DEPLOY / FORTIFY / PULSE.
+        </div>
+      </div>
+
+      <!-- VICTORY OVERLAY -->
+      <div id="victory-banner" class="victory-banner">
+        <h2 id="victory-title">NEXUS SUPREMACY ACHIEVED!</h2>
+        <p id="victory-desc"></p>
+        <button class="btn btn-primary" onclick="UI.startNewMatch()">Play Again</button>
+      </div>
+
+      <div class="svg-container">
+        <svg id="hex-board" viewBox="-290 -260 580 520" aria-label="Chrono-Hex Tactical Board"></svg>
+      </div>
+
+      <div class="board-footer">
+        <div class="legend-row">
+          <span>👑 <b>NEXUS (0,0)</b>: +3 VP &amp; +1⚡/turn</span>
+          <span>⚡ <b>RELAY</b>: +2⚡/turn</span>
+          <span>🏰 <b>CITADEL</b>: +1 VP &amp; +1⚡/turn</span>
+          <span>🛡️ <b>SHIELD</b>: +1 Def</span>
+          <span>🌀 <b>RIFT</b>: Impassable</span>
+        </div>
+        <div style="font-family: 'JetBrains Mono', monospace; color: var(--gold);">
+          WIN: First to 25 VP, Capture All Citadels, or Highest VP after Round 12
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: TELEMETRY, REPLAY SCRUBBER & AGENT HTTP/JSON API -->
+    <section class="panel">
+      <div class="tab-bar">
+        <button id="tab-btn-log" class="tab-btn active" onclick="UI.switchTab('log')">📜 Match &amp; Replay</button>
+        <button id="tab-btn-api" class="tab-btn" onclick="UI.switchTab('api')">🤖 Agent API</button>
+        <button id="tab-btn-rules" class="tab-btn" onclick="UI.switchTab('rules')">📖 1-Para Rules</button>
+      </div>
+
+      <!-- TAB 1: MATCH LOG & REPLAY SCRUBBER -->
+      <div id="tab-log" class="panel-body">
+        <div class="replay-box">
+          <div style="display: flex; justify-content: space-between; font-size: 11px; font-family: 'JetBrains Mono', monospace;">
+            <span>⏱️ Match Replay Scrubber</span>
+            <span id="replay-step-label" style="color: var(--accent);">Live State</span>
+          </div>
+          <input id="replay-slider" type="range" min="0" max="0" value="0" oninput="UI.scrubReplay(this.value)" />
+          <div style="display: flex; justify-content: space-between; gap: 6px;">
+            <button class="btn" style="flex:1; padding: 4px;" onclick="UI.stepReplay(-1)">◀ Prev Step</button>
+            <button class="btn" style="flex:1; padding: 4px;" onclick="UI.stepReplay(1)">Next Step ▶</button>
+            <button class="btn btn-primary" style="flex:1; padding: 4px;" onclick="UI.exitReplay()">Return Live</button>
+          </div>
+        </div>
+
+        <div style="font-family: 'Chakra Petch', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--muted);">
+          Live Battle Telemetry (<span id="log-count">1</span> events)
+        </div>
+        <div id="log-list" class="log-list"></div>
+      </div>
+
+      <!-- TAB 2: AGENT HTTP/JSON API & CONSOLE -->
+      <div id="tab-api" class="panel-body" style="display: none;">
+        <div class="rules-para">
+          <b>Dual Agent Interface:</b> AI agents play in the exact same match via our documented <b>HTTP/JSON API</b> (<code>server.js</code>) or directly in-browser via <code>window.AGENT_API</code>.
+        </div>
+
+        <div style="font-family: 'Chakra Petch', sans-serif; font-size: 12px; font-weight: 700; color: var(--accent);">
+          1. HTTP/JSON Endpoints
+        </div>
+        <pre class="code-block"># Read match state + legalMoves array
+curl -s http://localhost:8787/api/matches/TEMPO-4217
+
+# Submit a move (MARCH / DEPLOY / FORTIFY / PULSE / END_TURN)
+curl -s -X POST http://localhost:8787/api/matches/TEMPO-4217/move \
+  -H "Content-Type: application/json" \
+  -d '{"type":"MARCH","from":"0,-2","to":"0,-1","units":1}'
+
+# Trigger built-in bot or run sample_bot.js
+node sample_bot.js --url http://localhost:8787 --match TEMPO-4217</pre>
+
+        <div style="font-family: 'Chakra Petch', sans-serif; font-size: 12px; font-weight: 700; color: var(--accent);">
+          2. Live JSON State &amp; Move Tester
+        </div>
+        <div style="display: flex; gap: 6px;">
+          <button class="btn" style="flex:1;" onclick="UI.dumpLegalMovesToConsole()">Inspect Legal Moves</button>
+          <button class="btn btn-primary" style="flex:1;" onclick="UI.runAgentSmartMove()">Execute Best Agent Move</button>
+        </div>
+        <pre id="api-inspector" class="code-block" style="max-height: 220px; overflow-y: auto;"></pre>
+      </div>
+
+      <!-- TAB 3: ONE-PARAGRAPH RULES -->
+      <div id="tab-rules" class="panel-body" style="display: none;">
+        <div class="rules-para">
+          <b>Rules in One Paragraph:</b><br/><br/>
+          <b>Chrono-Hex: Tempo Nexus</b> is a 2–4 player turn-based tactical strategy game on a 37-hex board where each commander starts at an outer <b>Citadel</b> with 4 units and 4 Energy (⚡), spending <b>2 Action Points (AP)</b> per turn across four non-dominant actions: <b>MARCH</b> (0⚡, move units to reinforce or attack an adjacent hex, capturing it if attacking units strictly exceed defender units plus +1 Aegis Shield), <b>DEPLOY</b> (2⚡, +2 units on any owned hex), <b>FORTIFY</b> (2⚡, +1 unit and an Aegis Shield on an owned hex), or <b>EMP PULSE</b> (4⚡, range-2 orbital strike removing 2 enemy units and stripping shields). At the end of each turn, players harvest Energy (+2 base, +1 per Citadel, +2 per captured <b>Energy Relay</b>, +1 for the central <b>Tempo Nexus</b>) and Victory Points (+1 per Citadel, +3 for the central <b>Tempo Nexus</b>, and +1 per 3 owned hexes); the first player to reach <b>25 VP</b>, conquer all Citadels, or lead in VP after <b>12 rounds</b> wins.
+        </div>
+
+        <div class="rules-para">
+          <b>Why No Single Dominant Strategy Exists:</b>
+          <ul style="padding-left: 16px; margin-top: 6px; display: flex; flex-direction: column; gap: 4px;">
+            <li><b>Rush (Aggressor)</b> races for the central Tempo Nexus (+3 VP/turn), but central defenders get surrounded and hammered by range-2 <b>EMP Pulses</b>.</li>
+            <li><b>Turtle (Fortifier)</b> stacks Aegis Shields on chokepoints, but loses the Energy economy if rivals capture the outer <b>Energy Relays</b> (+2⚡/turn).</li>
+            <li><b>Greed (Harvester)</b> spreads thin across Relays, leaving its home Citadel vulnerable to a concentrated <b>March</b>.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="engine.js"></script>
+  <script>
+    "use strict";
+
+    const HEX_SIZE = 38;
+    const SQRT3 = Math.sqrt(3);
+
+    function hexToPixel(q, r) {
+      const x = HEX_SIZE * SQRT3 * (q + r / 2);
+      const y = HEX_SIZE * (3 / 2) * r;
+      return { x, y };
+    }
+
+    function hexPolygonPoints(cx, cy, radius) {
+      const pts = [];
+      for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI / 180) * (60 * i - 30);
+        pts.push(`${(cx + radius * Math.cos(angle)).toFixed(1)},${(cy + radius * Math.sin(angle)).toFixed(1)}`);
+      }
+      return pts.join(" ");
+    }
+
+    const UI = {
+      state: null,
+      selectedAction: "MARCH",
+      selectedSourceKey: null,
+      replayIndex: null,
+      autoPlayTimer: null,
+      serverConnected: false,
+
+      async init() {
+        // Check if running against live Node HTTP server
+        try {
+          const r = await fetch("/api/health");
+          if (r.ok) this.serverConnected = true;
+        } catch (_) {
+          this.serverConnected = false;
+        }
+
+        await this.startNewMatch();
+
+        document.getElementById("btn-new-match").addEventListener("click", () => this.startNewMatch());
+        document.getElementById("btn-bot-step").addEventListener("click", () => this.stepBot());
+        document.getElementById("btn-autoplay").addEventListener("click", () => this.toggleAutoPlay());
+        document.getElementById("player-count-select").addEventListener("change", () => this.startNewMatch());
+      },
+
+      async startNewMatch() {
+        this.stopAutoPlay();
+        this.replayIndex = null;
+        this.selectedSourceKey = null;
+
+        const code = (document.getElementById("match-code-input").value || "TEMPO-4217").trim().toUpperCase();
+        const numPlayers = Number(document.getElementById("player-count-select").value || 2);
+
+        const defaultRoles = ["HUMAN", "BOT:TACTICIAN", "BOT:AGGRESSOR", "BOT:HARVESTER"];
+        const seats = [];
+        for (let i = 0; i < numPlayers; i++) {
+          const f = ChronoHexEngine.FACTIONS[i];
+          const role = defaultRoles[i];
+          seats.push({
+            role,
+            name: role === "HUMAN" ? `${f.name} (Human)` : `${f.name} [${role.split(":")[1]}]`
+          });
+        }
+
+        if (this.serverConnected) {
+          try {
+            const res = await fetch("/api/matches", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ code, numPlayers, seats })
+            });
+            const data = await res.json();
+            if (data.ok) {
+              this.state = ChronoHexEngine.createMatch({ code, numPlayers, seats });
+            }
+          } catch (_) {}
+        }
+
+        this.state = ChronoHexEngine.createMatch({ code, numPlayers, seats });
+        this.render();
+      },
+
+      selectAction(act) {
+        if (this.replayIndex !== null) this.exitReplay();
+        this.selectedAction = act;
+        this.selectedSourceKey = null;
+        for (const id of ["MARCH", "DEPLOY", "FORTIFY", "PULSE"]) {
+          const btn = document.getElementById(`act-${id}`);
+          if (btn) btn.classList.toggle("selected", id === act);
+        }
+        this.render();
+      },
+
+      async applyMoveAndSync(move) {
+        if (this.replayIndex !== null) this.exitReplay();
+        const res = ChronoHexEngine.applyMove(this.state, move);
+        if (!res.ok) {
+          this.setPrompt(`⚠️ ${res.error}`);
+          return res;
+        }
+        if (this.serverConnected) {
+          fetch(`/api/matches/${this.state.code}/move`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(move)
+          }).catch(() => {});
+        }
+        this.selectedSourceKey = null;
+        this.render();
+
+        // If active player is now a BOT and we aren't paused, trigger bot turn after brief visual delay
+        const active = this.state.players[this.state.activePlayer];
+        if (this.state.status === "ACTIVE" && active && active.role.startsWith("BOT:") && !this.autoPlayTimer) {
+          setTimeout(() => {
+            if (this.state.status === "ACTIVE" && this.state.players[this.state.activePlayer].role.startsWith("BOT:")) {
+              this.stepBot();
+            }
+          }, 320);
+        }
+        return res;
+      },
+
+      onHexClick(key) {
+        if (this.replayIndex !== null) {
+          this.exitReplay();
+        }
+        if (this.state.status !== "ACTIVE") return;
+
+        const pid = this.state.activePlayer;
+        const cell = this.state.cells[key];
+        if (!cell) return;
+
+        if (this.selectedAction === "MARCH") {
+          if (!this.selectedSourceKey) {
+            if (cell.owner === pid && cell.units >= 2) {
+              this.selectedSourceKey = key;
+              this.setPrompt(`Selected (${cell.q},${cell.r}) with ${cell.units} units. Click an adjacent hex to MARCH.`);
+              this.renderBoard();
+            } else {
+              this.setPrompt(`Pick one of your hexes with at least 2 units to start a MARCH.`);
+            }
+          } else {
+            if (key === this.selectedSourceKey) {
+              this.selectedSourceKey = null;
+              this.renderBoard();
+              return;
+            }
+            const fromCell = this.state.cells[this.selectedSourceKey];
+            const dist = ChronoHexEngine.hexDist(fromCell.q, fromCell.r, cell.q, cell.r);
+            if (dist === 1 && cell.type !== "RIFT") {
+              this.applyMoveAndSync({
+                type: "MARCH",
+                from: this.selectedSourceKey,
+                to: key,
+                units: fromCell.units - 1
+              });
+            } else if (cell.owner === pid && cell.units >= 2) {
+              this.selectedSourceKey = key;
+              this.setPrompt(`Switched source to (${cell.q},${cell.r}). Click an adjacent hex to MARCH.`);
+              this.renderBoard();
+            } else {
+              this.setPrompt(`Target must be adjacent (distance 1) and not a Quantum Rift.`);
+            }
+          }
+        } else if (this.selectedAction === "DEPLOY") {
+          this.applyMoveAndSync({ type: "DEPLOY", target: key });
+        } else if (this.selectedAction === "FORTIFY") {
+          this.applyMoveAndSync({ type: "FORTIFY", target: key });
+        } else if (this.selectedAction === "PULSE") {
+          this.applyMoveAndSync({ type: "PULSE", target: key });
+        }
+      },
+
+      endTurn() {
+        this.applyMoveAndSync({ type: "END_TURN" });
+      },
+
+      stepBot() {
+        if (this.replayIndex !== null) this.exitReplay();
+        if (this.state.status !== "ACTIVE") return;
+        const active = this.state.players[this.state.activePlayer];
+        const move = ChronoHexEngine.chooseBotMove(this.state, active.role);
+        this.applyMoveAndSync(move);
+      },
+
+      toggleAutoPlay() {
+        const btn = document.getElementById("btn-autoplay");
+        if (this.autoPlayTimer) {
+          this.stopAutoPlay();
+          return;
+        }
+        if (this.state.status !== "ACTIVE") {
+          this.startNewMatch();
+        }
+        btn.textContent = "⏹️ Stop Auto-Sim";
+        this.autoPlayTimer = setInterval(() => {
+          if (this.state.status !== "ACTIVE") {
+            this.stopAutoPlay();
+            return;
+          }
+          const move = ChronoHexEngine.chooseBotMove(this.state, this.state.players[this.state.activePlayer].role);
+          ChronoHexEngine.applyMove(this.state, move);
+          this.render();
+        }, 180);
+      },
+
+      stopAutoPlay() {
+        if (this.autoPlayTimer) {
+          clearInterval(this.autoPlayTimer);
+          this.autoPlayTimer = null;
+        }
+        const btn = document.getElementById("btn-autoplay");
+        if (btn) btn.textContent = "⚡ Auto-Sim Bot vs Bot";
+      },
+
+      changeSeatRole(pid, newRole) {
+        const p = this.state.players[pid];
+        if (!p) return;
+        p.role = newRole;
+        const f = ChronoHexEngine.FACTIONS[pid];
+        p.name = newRole === "HUMAN" ? `${f.name} (Human)` : newRole === "AGENT" ? `${f.name} (HTTP Agent)` : `${f.name} [${newRole.split(":")[1]}]`;
+        this.render();
+        if (this.state.status === "ACTIVE" && this.state.activePlayer === pid && newRole.startsWith("BOT:")) {
+          this.stepBot();
+        }
+      },
+
+      scrubReplay(val) {
+        const idx = Number(val);
+        const snaps = this.state.snapshots || [];
+        if (idx >= snaps.length - 1) {
+          this.replayIndex = null;
+        } else {
+          this.replayIndex = idx;
+        }
+        this.render();
+      },
+
+      stepReplay(delta) {
+        const snaps = this.state.snapshots || [];
+        if (!snaps.length) return;
+        const cur = this.replayIndex === null ? snaps.length - 1 : this.replayIndex;
+        const next = Math.max(0, Math.min(snaps.length - 1, cur + delta));
+        this.scrubReplay(next);
+      },
+
+      exitReplay() {
+        this.replayIndex = null;
+        this.render();
+      },
+
+      switchTab(tab) {
+        for (const t of ["log", "api", "rules"]) {
+          document.getElementById(`tab-${t}`).style.display = t === tab ? "flex" : "none";
+          document.getElementById(`tab-btn-${t}`).classList.toggle("active", t === tab);
+        }
+        if (tab === "api") {
+          this.dumpLegalMovesToConsole();
+        }
+      },
+
+      dumpLegalMovesToConsole() {
+        const moves = ChronoHexEngine.getLegalMoves(this.state, this.state.activePlayer);
+        const payload = {
+          code: this.state.code,
+          round: this.state.round,
+          activePlayer: this.state.activePlayer,
+          activeName: this.state.players[this.state.activePlayer]?.name,
+          ap: this.state.players[this.state.activePlayer]?.ap,
+          energy: this.state.players[this.state.activePlayer]?.energy,
+          legalMovesCount: moves.length,
+          sampleLegalMoves: moves.slice(0, 6)
+        };
+        document.getElementById("api-inspector").textContent = JSON.stringify(payload, null, 2);
+      },
+
+      runAgentSmartMove() {
+        this.stepBot();
+        this.dumpLegalMovesToConsole();
+      },
+
+      setPrompt(msg) {
+        document.getElementById("prompt-banner").textContent = msg;
+      },
+
+      getDisplayState() {
+        if (this.replayIndex !== null && this.state.snapshots && this.state.snapshots[this.replayIndex]) {
+          return this.state.snapshots[this.replayIndex].state;
+        }
+        return this.state;
+      },
+
+      render() {
+        const st = this.getDisplayState();
+        const activeP = st.players[st.activePlayer];
+
+        // Status & Header
+        document.getElementById("status-badge").textContent = st.status;
+        document.getElementById("status-badge").style.color = st.status === "ACTIVE" ? "var(--accent)" : "var(--gold)";
+        document.getElementById("round-label").textContent = `ROUND ${st.round} / ${st.maxRounds}`;
+        document.getElementById("turn-owner-label").textContent = `${activeP.name}'s Turn`;
+        document.getElementById("turn-owner-label").style.color = activeP.color;
+        document.getElementById("active-ap-label").textContent = `${activeP.ap} AP · ${activeP.energy}⚡`;
+
+        // AP Pips
+        let pipsHtml = "";
+        for (let i = 0; i < 2; i++) {
+          pipsHtml += `<span class="ap-pip ${i < activeP.ap ? "" : "spent"}"></span>`;
+        }
+        document.getElementById("ap-pips-container").innerHTML = pipsHtml;
+
+        // Victory overlay
+        const vBanner = document.getElementById("victory-banner");
+        if (st.status === "FINISHED" && st.winner !== null) {
+          vBanner.classList.add("visible");
+          document.getElementById("victory-title").textContent = `🏆 ${st.players[st.winner].name} WINS!`;
+          document.getElementById("victory-desc").textContent = st.winReason;
+        } else {
+          vBanner.classList.remove("visible");
+        }
+
+        this.renderPlayers(st);
+        this.renderBoard(st);
+        this.renderLogAndReplay();
+      },
+
+      renderPlayers(st) {
+        const container = document.getElementById("players-container");
+        let html = "";
+        for (const p of st.players) {
+          const stats = ChronoHexEngine.getPlayerTerritoryStats(st, p.id);
+          const isTurn = st.status === "ACTIVE" && st.activePlayer === p.id;
+          html += `
+            <div class="player-card ${isTurn ? "active" : ""}" style="border-color: ${isTurn ? p.color : "var(--border)"}">
+              <div class="player-top">
+                <div class="player-name">
+                  <span class="faction-dot" style="background:${p.color}; box-shadow: 0 0 8px ${p.color};"></span>
+                  <span>P${p.id + 1}: ${p.name}</span>
+                </div>
+                <span class="turn-pill" style="background:${isTurn ? p.color : "var(--bg-2)"}; color:${isTurn ? "#050811" : "var(--muted)"}">
+                  ${isTurn ? `ACTIVE (${p.ap} AP)` : p.badge}
+                </span>
+              </div>
+              <div class="player-stats">
+                <div class="stat-box">
+                  <span class="stat-label">Victory Pts</span>
+                  <span class="stat-val" style="color: var(--gold);">${p.vp} / ${st.targetVp}</span>
+                </div>
+                <div class="stat-box">
+                  <span class="stat-label">Energy ⚡</span>
+                  <span class="stat-val" style="color: var(--accent);">${p.energy}⚡</span>
+                </div>
+                <div class="stat-box">
+                  <span class="stat-label">Hexes</span>
+                  <span class="stat-val">${stats.hexCount}</span>
+                </div>
+                <div class="stat-box">
+                  <span class="stat-label">Units</span>
+                  <span class="stat-val">${stats.totalUnits}</span>
+                </div>
+              </div>
+              <select class="role-select" onchange="UI.changeSeatRole(${p.id}, this.value)" aria-label="Seat ${p.id + 1} Controller">
+                <option value="HUMAN" ${p.role === "HUMAN" ? "selected" : ""}>👤 Human Player (Browser)</option>
+                <option value="AGENT" ${p.role === "AGENT" ? "selected" : ""}>🔌 External HTTP/JSON Agent</option>
+                <option value="BOT:TACTICIAN" ${p.role === "BOT:TACTICIAN" ? "selected" : ""}>🤖 Bot: Tactician (Balanced)</option>
+                <option value="BOT:AGGRESSOR" ${p.role === "BOT:AGGRESSOR" ? "selected" : ""}>🤖 Bot: Aggressor (Nexus Rush)</option>
+                <option value="BOT:HARVESTER" ${p.role === "BOT:HARVESTER" ? "selected" : ""}>🤖 Bot: Harvester (Relay Econ)</option>
+              </select>
+            </div>
+          `;
+        }
+        container.innerHTML = html;
+      },
+
+      renderBoard(st = this.getDisplayState()) {
+        const svg = document.getElementById("hex-board");
+        const pid = st.activePlayer;
+        const ownedCells = Object.values(st.cells).filter((c) => c.owner === pid);
+
+        let svgHtml = `
+          <defs>
+            <radialGradient id="nexusGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#F59E0B" stop-opacity="0.45"/>
+              <stop offset="100%" stop-color="#0D1322" stop-opacity="0.9"/>
+            </radialGradient>
+            <radialGradient id="riftGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#020617" stop-opacity="1"/>
+              <stop offset="100%" stop-color="#1E1B4B" stop-opacity="0.7"/>
+            </radialGradient>
+          </defs>
+        `;
+
+        for (const cell of Object.values(st.cells)) {
+          const { x, y } = hexToPixel(cell.q, cell.r);
+          const pts = hexPolygonPoints(x, y, HEX_SIZE - 2);
+
+          let fill = "#111A2E";
+          let stroke = "#263554";
+          if (cell.type === "RIFT") {
+            fill = "url(#riftGlow)";
+            stroke = "#312E81";
+          } else if (cell.owner !== null) {
+            const ownerP = st.players[cell.owner];
+            fill = ownerP.bg;
+            stroke = ownerP.color;
+          } else if (cell.type === "NEXUS") {
+            fill = "url(#nexusGlow)";
+            stroke = "#F59E0B";
+          } else if (cell.type === "RELAY") {
+            fill = "#0D2238";
+            stroke = "#38BDF8";
+          }
+
+          // Determine if this cell is a legal highlight target
+          let isSelected = this.selectedSourceKey === cell.key;
+          let isLegalTarget = false;
+          if (st.status === "ACTIVE" && this.replayIndex === null) {
+            if (this.selectedAction === "MARCH" && this.selectedSourceKey) {
+              const src = st.cells[this.selectedSourceKey];
+              if (src && ChronoHexEngine.hexDist(src.q, src.r, cell.q, cell.r) === 1 && cell.type !== "RIFT") {
+                isLegalTarget = true;
+              }
+            } else if (this.selectedAction === "DEPLOY" && cell.owner === pid && cell.units < 8) {
+              isLegalTarget = true;
+            } else if (this.selectedAction === "FORTIFY" && cell.owner === pid && !cell.shielded) {
+              isLegalTarget = true;
+            } else if (this.selectedAction === "PULSE" && cell.owner !== null && cell.owner !== pid) {
+              if (ownedCells.some((oc) => ChronoHexEngine.hexDist(oc.q, oc.r, cell.q, cell.r) <= 2)) {
+                isLegalTarget = true;
+              }
+            }
+          }
+
+          // Inner ring for special structures
+          let structureDecor = "";
+          if (cell.type === "NEXUS") {
+            structureDecor = `<polygon points="${hexPolygonPoints(x, y, HEX_SIZE - 9)}" fill="none" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4 2" />`;
+          } else if (cell.type === "CITADEL") {
+            structureDecor = `<polygon points="${hexPolygonPoints(x, y, HEX_SIZE - 8)}" fill="none" stroke="#F8FAFC" stroke-width="1.4" opacity="0.65" />`;
+          } else if (cell.type === "RELAY") {
+            structureDecor = `<circle cx="${x}" cy="${y}" r="${HEX_SIZE - 12}" fill="none" stroke="#38BDF8" stroke-width="1.2" stroke-dasharray="3 3" opacity="0.7" />`;
+          }
+
+          // Aegis Shield halo
+          let shieldDecor = "";
+          if (cell.shielded) {
+            shieldDecor = `<circle cx="${x}" cy="${y + 2}" r="18" fill="rgba(56, 189, 248, 0.16)" stroke="#38BDF8" stroke-width="2" />`;
+          }
+
+          // Type icon & coordinate label
+          let typeLabel = "";
+          if (cell.type === "NEXUS") typeLabel = "👑 NEXUS";
+          else if (cell.type === "CITADEL") typeLabel = "🏰 CITADEL";
+          else if (cell.type === "RELAY") typeLabel = "⚡ RELAY";
+          else if (cell.type === "RIFT") typeLabel = "🌀 RIFT";
+
+          const unitColor = cell.owner !== null ? st.players[cell.owner].light : cell.units > 0 ? "#CBD5E1" : "#475569";
+
+          svgHtml += `
+            <g class="hex-cell ${isSelected ? "selected" : ""} ${isLegalTarget ? "legal-target" : ""}"
+               onclick="UI.onHexClick('${cell.key}')"
+               data-key="${cell.key}">
+              <polygon class="hex-polygon" points="${pts}" fill="${fill}" stroke="${stroke}" />
+              ${structureDecor}
+              ${shieldDecor}
+              <text x="${x}" y="${y - 16}" text-anchor="middle" fill="#64748B" font-family="JetBrains Mono" font-size="8.5">
+                ${cell.q},${cell.r}
+              </text>
+              ${
+                typeLabel
+                  ? `<text x="${x}" y="${y - 6}" text-anchor="middle" fill="${cell.type === "NEXUS" ? "#FBBF24" : "#94A3B8"}" font-family="Chakra Petch" font-weight="700" font-size="8.5">${typeLabel}</text>`
+                  : ""
+              }
+              ${
+                cell.type !== "RIFT" && cell.units > 0
+                  ? `<text x="${x}" y="${y + 11}" text-anchor="middle" fill="${unitColor}" font-family="JetBrains Mono" font-weight="700" font-size="16">${cell.units}${cell.shielded ? "🛡️" : ""}</text>`
+                  : ""
+              }
+            </g>
+          `;
+        }
+
+        svg.innerHTML = svgHtml;
+      },
+
+      renderLogAndReplay() {
+        const snaps = this.state.snapshots || [];
+        const slider = document.getElementById("replay-slider");
+        slider.max = Math.max(0, snaps.length - 1);
+        slider.value = this.replayIndex === null ? Math.max(0, snaps.length - 1) : this.replayIndex;
+
+        const stepLabel = document.getElementById("replay-step-label");
+        if (this.replayIndex === null) {
+          stepLabel.textContent = `Live (Step ${snaps.length}/${snaps.length})`;
+        } else {
+          const snap = snaps[this.replayIndex];
+          stepLabel.textContent = `Replay ${this.replayIndex + 1}/${snaps.length}: ${snap ? snap.label : ""}`;
+        }
+
+        const st = this.getDisplayState();
+        document.getElementById("log-count").textContent = st.log.length;
+        const list = document.getElementById("log-list");
+        const recent = [...st.log].reverse().slice(0, 35);
+        list.innerHTML = recent
+          .map((item) => {
+            const p = item.player !== null && st.players[item.player] ? st.players[item.player] : null;
+            const bColor = p ? p.color : "#38BDF8";
+            return `<div class="log-item" style="border-left-color: ${bColor}">
+              <span style="color: var(--muted);">[R${item.round}]</span> ${item.text}
+            </div>`;
+          })
+          .join("");
+      }
+    };
+
+    // Expose programmatic window.AGENT_API so browser-based agents & Playwright bots can play directly
+    window.AGENT_API = {
+      getState: () => UI.state,
+      getLegalMoves: () => ChronoHexEngine.getLegalMoves(UI.state, UI.state.activePlayer),
+      submitMove: (move) => UI.applyMoveAndSync(move),
+      stepBot: () => UI.stepBot(),
+      newMatch: (opts = {}) => {
+        if (opts.code) document.getElementById("match-code-input").value = opts.code;
+        if (opts.numPlayers) document.getElementById("player-count-select").value = String(opts.numPlayers);
+        return UI.startNewMatch();
+      }
+    };
+
+    window.addEventListener("DOMContentLoaded", () => UI.init());
+  </script>
+</body>
+</html>
